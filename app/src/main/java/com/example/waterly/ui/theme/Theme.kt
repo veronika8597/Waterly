@@ -52,7 +52,7 @@ fun WaterlyTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = WaterlyTypography,
         content = content
     )
 }

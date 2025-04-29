@@ -36,7 +36,10 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.waterly.ui.theme.QuicksandFont
+import com.example.waterly.ui.theme.ShrikhandFont
 import com.example.waterly.ui.theme.WaterlyTheme
+import com.example.waterly.ui.theme.WaterlyTypography
 import kotlinx.coroutines.launch
 
 
@@ -64,8 +67,9 @@ fun HomeScreen(navController: NavHostController) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Drink Today",
-                style = MaterialTheme.typography.headlineMedium
+                text = "Drink Water",
+                style = WaterlyTypography.displayLarge,
+                color = Color(0xFF00B4FC)
             )
         }
 
@@ -94,12 +98,12 @@ fun HomeScreen(navController: NavHostController) {
                                 else R.drawable.water_bottle
                             ),
                             contentDescription = null,
-                            tint = Color(0xFF2196F3), // blue
+                            tint = Color(0xFF2196F3),
                             modifier = Modifier.size(32.dp)
                         )
                         Text(
                             text = if (selectedItem == "glass") "250 ml" else "${selectedBottleSize ?: "?"} ml",
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = WaterlyTypography.bodyLarge, // << use correct size
                             color = Color.Gray,
                             modifier = Modifier.padding(top = 4.dp)
                         )
@@ -107,7 +111,6 @@ fun HomeScreen(navController: NavHostController) {
 
                     Spacer(modifier = Modifier.height(16.dp))
                 }
-
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -137,14 +140,8 @@ fun HomeScreen(navController: NavHostController) {
                         Image(
                             painter = painterResource(id = R.drawable.water_glass),
                             contentDescription = "Glass of Water",
-                            modifier = Modifier.size(56.dp),
+                            modifier = Modifier.size(55.dp),
                             colorFilter = if (selectedItem == "glass") null else ColorFilter.tint(Color.Gray)
-                        )
-                        Text(
-                            text = "+250 ml",
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(top = 8.dp),
-                            color = if (selectedItem == "glass") Color.Unspecified else Color.Gray
                         )
                     }
 
@@ -156,29 +153,24 @@ fun HomeScreen(navController: NavHostController) {
                                 IntOffset(
                                     0,
                                     if (selectedItem == "bottle") (-8).dp.roundToPx() else 0
-                                )}
+                                )
+                            }
                             .clickable {
                                 showBottleDialog = true
                                 selectedItem = "bottle"
                                 coroutineScope.launch {
                                     scale.animateTo(1.2f, tween(100))
                                     scale.animateTo(1f, tween(100))
-                                }}
+                                }
+                            }
                     ) {
                         Image(
                             painter = painterResource(id = R.drawable.water_bottle),
                             contentDescription = "Water Bottle",
-                            modifier = Modifier.size(55.dp),
+                            modifier = Modifier.size(60.dp),
                             colorFilter = if (selectedItem == "bottle") null else ColorFilter.tint(Color.Gray)
                         )
-                        Text(
-                            text = "Bottle",
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(top = 8.dp),
-                            color = if (selectedItem == "bottle") Color.Unspecified else Color.Gray
-                        )
                     }
-
                 }
 
                 if (showBottleDialog) {
@@ -192,13 +184,9 @@ fun HomeScreen(navController: NavHostController) {
                         onDismiss = { showBottleDialog = false }
                     )
                 }
-
-
-
             }
         }
     }
-
 }
 
 @Preview(showBackground = true)

@@ -1,21 +1,33 @@
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.material3.TextFieldDefaults.indicatorLine
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlin.math.sin
+import com.example.waterly.ui.theme.WaterlyTypography
 
 @Composable
 fun WaterFillCircle(waterIntake: Int, waterGoal: Int) {
@@ -55,7 +67,7 @@ fun WaterFillCircle(waterIntake: Int, waterGoal: Int) {
         modifier = Modifier
             .size(220.dp)
             .clip(CircleShape)
-            .background(Color.LightGray),
+            .border(2.dp, Color.Gray, CircleShape),
         contentAlignment = Alignment.Center
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
@@ -63,7 +75,7 @@ fun WaterFillCircle(waterIntake: Int, waterGoal: Int) {
             val height = size.height
             val waterLevel = height * (1f - animatedProgress)
 
-            // First: Light wave path (under)
+            // Light wave path
             val lightWavePath = Path().apply {
                 moveTo(0f, waterLevel)
                 val waveLength = width / 6.5f
@@ -79,7 +91,7 @@ fun WaterFillCircle(waterIntake: Int, waterGoal: Int) {
                 close()
             }
 
-            // Then: Dark wave path (above)
+            // Dark wave path
             val darkWavePath = Path().apply {
                 moveTo(0f, waterLevel)
                 val waveLength = width / 6f
@@ -95,12 +107,12 @@ fun WaterFillCircle(waterIntake: Int, waterGoal: Int) {
                 close()
             }
 
-            // Draw light wave first
+            // Draw light wave
             clipPath(lightWavePath) {
                 drawRect(Color(0xFFAFE6FB)) // Light blue
             }
 
-            // Draw dark wave second (on top)
+            // Draw dark wave
             clipPath(darkWavePath) {
                 drawRect(Color(0xFF00B4FC)) // Darker blue
             }
@@ -109,14 +121,21 @@ fun WaterFillCircle(waterIntake: Int, waterGoal: Int) {
         // Center text
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                "$waterIntake ml",
-                style = MaterialTheme.typography.headlineLarge,
+                text = "$waterIntake ml",
+                style = WaterlyTypography.displayLarge,
                 color = Color.Black
             )
             Text(
-                "/ $waterGoal ml",
+                text = "/ $waterGoal ml",
+                style = WaterlyTypography.headlineMedium,
                 color = Color.Black
             )
         }
     }
+}
+
+@Preview
+@Composable
+fun WaterFillCirclePreview() {
+    WaterFillCircle(waterIntake = 1000, waterGoal = 2000)
 }
