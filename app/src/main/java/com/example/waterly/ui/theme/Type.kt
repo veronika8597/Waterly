@@ -70,7 +70,7 @@ val WaterlyTypography = Typography(
     labelLarge = TextStyle(
         fontFamily = QuicksandFont,
         fontWeight = FontWeight.Bold,
-        fontSize = 16.sp
+        fontSize = 28.sp
     ),
 
     // Tiny text (Quicksand Medium for hints, buttons)
