@@ -23,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -34,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
@@ -51,13 +53,20 @@ fun HomeScreen(navController: NavHostController) {
     val coroutineScope = rememberCoroutineScope()
     var waterIntake by rememberSaveable { mutableIntStateOf(0) }
     val selectedDate = rememberSaveable { mutableStateOf(getTodayDate()) }
-    val waterHistory = rememberSaveable { mutableStateOf(mutableMapOf<String, Int>()) }
     val waterGoal = 2000 // in ml
     val scale = remember { Animatable(1f) }
     var showBottleDialog by rememberSaveable { mutableStateOf(false) }
     var selectedBottleSize by rememberSaveable { mutableStateOf<Int?>(null) }
     var selectedItem by rememberSaveable { mutableStateOf<String?>(null) }
     val currentWeek = remember { getCurrentWeekDates() }
+    val context = LocalContext.current
+    val waterHistory = remember { mutableStateOf(WaterDataStore.loadWaterHistory(context)) }
+    var showFutureOverlay by rememberSaveable { mutableStateOf(false) }
+
+
+    LaunchedEffect(selectedDate.value) {
+        waterIntake = waterHistory.value[selectedDate.value] ?: 0
+    }
 
 
     Column(
@@ -135,11 +144,20 @@ fun HomeScreen(navController: NavHostController) {
                                 )
                             }
                             .clickable {
-                                selectedItem = "glass"
-                                waterIntake += 250
-                                coroutineScope.launch {
-                                    scale.animateTo(1.2f, tween(100))
-                                    scale.animateTo(1f, tween(100))
+                                if (!isFutureDate(selectedDate.value)) {
+                                    selectedItem = "glass"
+                                    waterIntake += 250
+                                    waterHistory.value = waterHistory.value.toMutableMap().apply {
+                                        put(selectedDate.value, waterIntake)
+                                    }
+                                    WaterDataStore.saveWaterHistory(context, waterHistory.value)
+                                    coroutineScope.launch {
+                                        scale.animateTo(1.2f, tween(100))
+                                        scale.animateTo(1f, tween(100))
+                                    }
+                                }
+                                else {
+                                    showFutureOverlay = true
                                 }
                             }
                     ) {
@@ -164,11 +182,16 @@ fun HomeScreen(navController: NavHostController) {
                                 )
                             }
                             .clickable {
-                                showBottleDialog = true
-                                selectedItem = "bottle"
-                                coroutineScope.launch {
-                                    scale.animateTo(1.2f, tween(100))
-                                    scale.animateTo(1f, tween(100))
+                                if (!isFutureDate(selectedDate.value)) {
+                                    showBottleDialog = true
+                                    selectedItem = "bottle"
+                                    coroutineScope.launch {
+                                        scale.animateTo(1.2f, tween(100))
+                                        scale.animateTo(1f, tween(100))
+                                    }
+                                }
+                                else {
+                                    showFutureOverlay = true
                                 }
                             }
                     ) {
@@ -187,6 +210,11 @@ fun HomeScreen(navController: NavHostController) {
                     BottleSizeDialog(
                         onSelect = { size ->
                             waterIntake += size
+                            waterHistory.value = waterHistory.value.toMutableMap().apply {
+                                put(selectedDate.value, waterIntake)
+                            }
+                            WaterDataStore.saveWaterHistory(context, waterHistory.value)
+
                             selectedBottleSize = size
                             selectedItem = "bottle"
                             showBottleDialog = false
@@ -276,6 +304,26 @@ fun HomeScreen(navController: NavHostController) {
                         )
                     }
                 }
+            }
+        }
+    }
+
+    if (showFutureOverlay) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.4f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Can't log future data",
+                style = WaterlyTypography.bodyLarge,
+                color = Color.White
+            )
+
+            LaunchedEffect(Unit) {
+                kotlinx.coroutines.delay(1500)
+                showFutureOverlay = false
             }
         }
     }
