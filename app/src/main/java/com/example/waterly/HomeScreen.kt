@@ -19,6 +19,9 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIos
+import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -29,6 +32,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -36,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
@@ -45,6 +50,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.waterly.ui.theme.WaterlyTheme
 import com.example.waterly.ui.theme.WaterlyTypography
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 
 @SuppressLint("MutableCollectionMutableState")
@@ -58,34 +66,46 @@ fun HomeScreen(navController: NavHostController) {
     var showBottleDialog by rememberSaveable { mutableStateOf(false) }
     var selectedBottleSize by rememberSaveable { mutableStateOf<Int?>(null) }
     var selectedItem by rememberSaveable { mutableStateOf<String?>(null) }
-    val currentWeek = remember { getCurrentWeekDates() }
+    //val currentWeek = remember { getCurrentWeekDates() }
     val context = LocalContext.current
     val waterHistory = remember { mutableStateOf(WaterDataStore.loadWaterHistory(context)) }
     var showFutureOverlay by rememberSaveable { mutableStateOf(false) }
     var selectedIndex by rememberSaveable { mutableIntStateOf(1) }
 
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    var currentWeekStart by rememberSaveable(stateSaver = Saver(
+        save = { dateFormat.format(it) },
+        restore = { dateFormat.parse(it)!! }
+    )) { mutableStateOf(dateFormat.parse(getTodayDate())!!) }
+
+    val currentWeek by remember(currentWeekStart) {
+        mutableStateOf(getCurrentWeekDates(currentWeekStart))
+    }
+
 
     LaunchedEffect(selectedDate.value) {
         waterIntake = waterHistory.value[selectedDate.value] ?: 0
+        selectedItem = null
+        selectedBottleSize = null
     }
-
 
     Box(modifier = Modifier.fillMaxSize()) {
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(25.dp)
+                .padding(10.dp)
                 .padding(bottom = 100.dp) // ✅ leave space for the nav bar
         ) {
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(36.dp))
 
             // Top Bar
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+
                 Text(
                     text = "Drink Water",
                     style = WaterlyTypography.displayLarge,
@@ -101,7 +121,7 @@ fun HomeScreen(navController: NavHostController) {
                 color = Color.Gray
             )
 
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(45.dp))
 
             // Middle area - Centered Water Circle + Glass
             Box(
@@ -239,88 +259,121 @@ fun HomeScreen(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(30.dp))
 
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "Week",
-                    style = WaterlyTypography.labelLarge,
-                    color = Color.Black
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Week",
+                        style = WaterlyTypography.labelLarge,
+                        color = Color.Black
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                Box(
-                    modifier = Modifier
-                        .width(60.dp)
-                        .height(2.dp)
-                        .background(Color(0xFF00B4FC)) // blue underline
-                )
-
-                Spacer(modifier = Modifier.height(30.dp))
-
-                // Week range (Nov 15 – Nov 21)
-                Text(
-                    text = getWeekRangeTitle(currentWeek),
-                    style = WaterlyTypography.labelMedium,
-                    color = Color.Gray
-                )
-
-            }
-
-            Spacer(modifier = Modifier.height(30.dp))
-
-            val dayNames = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                currentWeek.forEachIndexed { index, date ->
-                    val isSelected = date == selectedDate.value
-
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
+                    Box(
                         modifier = Modifier
-                            .weight(1f)
-                            .clickable {
-                                selectedDate.value = date
-                                waterIntake = waterHistory.value[date] ?: 0
-                            }
+                            .width(60.dp)
+                            .height(2.dp)
+                            .background(Color(0xFF00B4FC))
+                    )
+
+                    Spacer(modifier = Modifier.height(30.dp))
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
                     ) {
-                        // Day name
+                        Icon(
+                            imageVector = Icons.Default.ArrowBackIos,
+                            contentDescription = "Previous Week",
+                            tint = Color.LightGray,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clickable {
+                                    val cal = Calendar.getInstance().apply {
+                                        time = currentWeekStart
+                                        add(Calendar.WEEK_OF_YEAR, -1)
+                                    }
+                                    currentWeekStart = cal.time
+                                }
+                        )
+
+                        Spacer(modifier = Modifier.width(16.dp))
+
                         Text(
-                            text = dayNames[index % 7],
-                            style = WaterlyTypography.labelSmall,
+                            text = getWeekRangeTitle(currentWeek),
+                            style = WaterlyTypography.labelMedium,
                             color = Color.Gray
                         )
 
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.width(16.dp))
 
-                        // Date box
-                        Box(
+                        Icon(
+                            imageVector = Icons.Default.ArrowForwardIos,
+                            contentDescription = "Next Week",
+                            tint = Color.LightGray,
                             modifier = Modifier
-                                .size(40.dp)
-                                .background(
-                                    color = if (isSelected) Color(0xFF00B4FC) else Color(0xFFE0E0E0),
-                                    shape = MaterialTheme.shapes.small
-                                ),
-                            contentAlignment = Alignment.Center
+                                .size(24.dp)
+                                .clickable {
+                                    val cal = Calendar.getInstance().apply {
+                                        time = currentWeekStart
+                                        add(Calendar.WEEK_OF_YEAR, 1)
+                                    }
+                                    currentWeekStart = cal.time
+                                }
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(30.dp))
+
+                val dayNames = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    currentWeek.forEachIndexed { index, date ->
+                        val isSelected = date == selectedDate.value
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .weight(1f)
+                                .clickable {
+                                    selectedDate.value = date
+                                    waterIntake = waterHistory.value[date] ?: 0
+                                }
                         ) {
                             Text(
-                                text = date.takeLast(2), // Show day number
-                                style = WaterlyTypography.labelMedium,
-                                color = if (isSelected) Color.White else Color.Black
+                                text = dayNames[index % 7],
+                                style = WaterlyTypography.labelSmall,
+                                color = Color.Gray
                             )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(45.dp)
+                                    .background(
+                                        color = if (isSelected) Color(0xFF00B4FC) else Color(
+                                            0xFFE0E0E0
+                                        ),
+                                        shape = MaterialTheme.shapes.small
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = date.takeLast(2),
+                                    style = WaterlyTypography.labelMedium,
+                                    color = if (isSelected) Color.White else Color.Black
+                                )
+                            }
                         }
                     }
                 }
             }
-        }
 
-        //Bottom navigation bar
+
+            //Bottom navigation bar
         Box(
             modifier = Modifier
                 .fillMaxWidth()
