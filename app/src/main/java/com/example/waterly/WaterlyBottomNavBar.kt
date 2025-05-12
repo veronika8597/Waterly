@@ -3,6 +3,7 @@ package com.example.waterly
 import android.annotation.SuppressLint
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -35,7 +36,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -60,7 +63,6 @@ fun WaterlyBottomNavBar(
         targetValue = (selectedIndex + 0.5f) * (screenWidthDp / items.size.toFloat()).dp,
         label = ""
     )
-
 
     Box(
         modifier = modifier
@@ -108,7 +110,6 @@ fun WaterlyBottomNavBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(barHeight),
-
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.Bottom
         ) {
@@ -127,6 +128,9 @@ fun WaterlyBottomNavBar(
                 val iconColor by animateColorAsState(
                     if (isSelected) Color.White else Color.Gray, label = ""
                 )
+                val bubbleScale by animateFloatAsState(
+                    targetValue = if (isSelected) 1.1f else 1f, label = ""
+                )
 
                 Box(
                     modifier = Modifier
@@ -138,7 +142,7 @@ fun WaterlyBottomNavBar(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Box(
                             modifier = Modifier
-                                .size(iconSize)
+                                .size(iconSize * bubbleScale)
                                 .offset(y = offsetY),
                             contentAlignment = Alignment.Center
                         ) {
@@ -170,6 +174,7 @@ fun WaterlyBottomNavBar(
         }
     }
 }
+
 
 @Preview(showBackground = true, widthDp = 360, heightDp = 100)
 @Composable
