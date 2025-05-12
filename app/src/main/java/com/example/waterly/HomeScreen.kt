@@ -40,7 +40,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
@@ -66,7 +65,6 @@ fun HomeScreen(navController: NavHostController) {
     var showBottleDialog by rememberSaveable { mutableStateOf(false) }
     var selectedBottleSize by rememberSaveable { mutableStateOf<Int?>(null) }
     var selectedItem by rememberSaveable { mutableStateOf<String?>(null) }
-    //val currentWeek = remember { getCurrentWeekDates() }
     val context = LocalContext.current
     val waterHistory = remember { mutableStateOf(WaterDataStore.loadWaterHistory(context)) }
     var showFutureOverlay by rememberSaveable { mutableStateOf(false) }
@@ -95,7 +93,7 @@ fun HomeScreen(navController: NavHostController) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(10.dp)
-                .padding(bottom = 100.dp) // ✅ leave space for the nav bar
+                .padding(bottom = 100.dp)
         ) {
 
             Spacer(modifier = Modifier.height(36.dp))
@@ -151,7 +149,7 @@ fun HomeScreen(navController: NavHostController) {
                             )
                             Text(
                                 text = if (selectedItem == "glass") "250 ml" else "${selectedBottleSize ?: "?"} ml",
-                                style = WaterlyTypography.bodyLarge, // << use correct size
+                                style = WaterlyTypography.bodyLarge,
                                 color = Color.Gray,
                                 modifier = Modifier.padding(top = 4.dp)
                             )
@@ -372,18 +370,14 @@ fun HomeScreen(navController: NavHostController) {
                 }
             }
 
+        //Bottom navigation bar
+        WaterlyBottomNavBar(
+            selectedIndex = selectedIndex,
+            onItemSelected = { selectedIndex = it },
+            navController = navController,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
 
-            //Bottom navigation bar
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-        ) {
-            WaterlyBottomNavBar(
-                selectedIndex = selectedIndex,
-                onItemSelected = { selectedIndex = it }
-            )
-        }
 
         if (showFutureOverlay) {
             Box(

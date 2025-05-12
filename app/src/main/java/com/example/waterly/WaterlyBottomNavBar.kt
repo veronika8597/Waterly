@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -36,19 +35,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.test.isSelected
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
+import androidx.navigation.NavHostController
 
 @SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
 fun WaterlyBottomNavBar(
     selectedIndex: Int,
     onItemSelected: (Int) -> Unit,
+    navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
     val items = listOf(Icons.Default.History, Icons.Default.Home, Icons.Default.Settings)
@@ -136,7 +136,14 @@ fun WaterlyBottomNavBar(
                     modifier = Modifier
                         .width(itemWidth.dp)
                         .fillMaxHeight()
-                        .clickable { onItemSelected(index) },
+                        .clickable {
+                            onItemSelected(index)
+                            when (index) {
+                                0 -> navController.navigate("statistics")
+                                1 -> navController.navigate("home")
+                                // 2 -> navController.navigate("settings") // Future use
+                            }
+                        },
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -183,6 +190,7 @@ fun WaterlyBottomBarPreview() {
 
     WaterlyBottomNavBar(
         selectedIndex = selected,
-        onItemSelected = { selected = it }
+        onItemSelected = { selected = it },
+        navController = NavHostController(LocalContext.current),
     )
 }
