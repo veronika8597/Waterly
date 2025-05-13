@@ -5,9 +5,8 @@ import com.example.waterly.ui.theme.WaterlyTheme
 
 @Composable
 fun WaterlyApp() {
-
     WaterlyTheme{
-        WaterlyNavGraph()
+        MainScreen()
     }
 
 }
