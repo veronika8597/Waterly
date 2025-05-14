@@ -19,6 +19,9 @@ object WaterDataStore {
     private val GOAL_KEY = intPreferencesKey("dailyGoal")
     private val REMINDER_ENABLED_KEY = booleanPreferencesKey("reminderEnabled")
     private val REMINDER_INTERVAL_KEY = intPreferencesKey("reminderInterval")
+    private val QUIET_HOURS_START = intPreferencesKey("quietHoursStart") // hour (0-23)
+    private val QUIET_HOURS_END = intPreferencesKey("quietHoursEnd")
+
 
 
     fun saveWaterHistory(context: Context, history: Map<String,Int>) {
@@ -74,6 +77,28 @@ object WaterDataStore {
         }
     }
 
+    fun saveQuietHours(context: Context, startHour: Int, endHour: Int) {
+        runBlocking {
+            context.dataStore.edit {
+                it[QUIET_HOURS_START] = startHour
+                it[QUIET_HOURS_END] = endHour
+            }
+        }
+    }
 
+    fun loadQuietHours(context: Context): Pair<Int, Int> {
+        return runBlocking {
+            val prefs = context.dataStore.data.first()
+            val start = prefs[QUIET_HOURS_START] ?: 22
+            val end = prefs[QUIET_HOURS_END] ?: 7
+            start to end
+        }
+    }
+
+    fun clearAllData(context: Context) {
+        runBlocking {
+            context.dataStore.edit { it.clear() }
+        }
+    }
 
 }
