@@ -1,6 +1,7 @@
 package com.example.waterly
 
 import android.content.Context
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -16,6 +17,7 @@ private val Context.dataStore by preferencesDataStore(name = "water_history")
 object WaterDataStore {
     private val HISTORY_KEY = stringPreferencesKey("waterHistory")
     private val GOAL_KEY = intPreferencesKey("dailyGoal")
+    private val REMINDER_ENABLED_KEY = booleanPreferencesKey("reminderEnabled")
 
 
     fun saveWaterHistory(context: Context, history: Map<String,Int>) {
@@ -44,5 +46,19 @@ object WaterDataStore {
             prefs[GOAL_KEY] ?: 2000 // default to 2000 ml
         }
     }
+
+    fun saveReminderEnabled(context: Context, isEnabled: Boolean) {
+        runBlocking {
+            context.dataStore.edit { it[REMINDER_ENABLED_KEY] = isEnabled }
+        }
+    }
+
+    fun loadReminderEnabled(context: Context): Boolean {
+        return runBlocking {
+            val prefs = context.dataStore.data.first()
+            prefs[REMINDER_ENABLED_KEY] ?: true // default to ON
+        }
+    }
+
 
 }
