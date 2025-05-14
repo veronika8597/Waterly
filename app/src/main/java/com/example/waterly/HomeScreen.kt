@@ -92,7 +92,8 @@ fun HomeScreen(navController: NavHostController, selectedIndex: Int, onItemSelec
 
     Column(
         modifier = Modifier.fillMaxSize(),
-
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.Start
     ) {
 
         Spacer(modifier = Modifier.height(40.dp))

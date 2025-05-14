@@ -2,6 +2,7 @@ package com.example.waterly
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
@@ -14,6 +15,8 @@ private val Context.dataStore by preferencesDataStore(name = "water_history")
 
 object WaterDataStore {
     private val HISTORY_KEY = stringPreferencesKey("waterHistory")
+    private val GOAL_KEY = intPreferencesKey("dailyGoal")
+
 
     fun saveWaterHistory(context: Context, history: Map<String,Int>) {
         val json = Json.encodeToString(history)
@@ -28,4 +31,18 @@ object WaterDataStore {
             prefs[HISTORY_KEY]?.let { Json.decodeFromString(it) } ?: emptyMap()
         }
     }
+
+    fun saveDailyGoal(context: Context, goal: Int) {
+        runBlocking {
+            context.dataStore.edit { it[GOAL_KEY] = goal }
+        }
+    }
+
+    fun loadDailyGoal(context: Context): Int {
+        return runBlocking {
+            val prefs = context.dataStore.data.first()
+            prefs[GOAL_KEY] ?: 2000 // default to 2000 ml
+        }
+    }
+
 }
