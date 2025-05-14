@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.OutlinedTextField
@@ -38,26 +39,20 @@ fun SettingsScreen(
 {
 
     val context = LocalContext.current
+    val intervalOptions = listOf(1, 2, 3, 4) // in hours
+
     var goalInput by remember { mutableStateOf("") }
     val currentGoal = remember { mutableIntStateOf(WaterDataStore.loadDailyGoal(context)) }
-    //var notificationsEnabled by remember { mutableStateOf(WaterDataStore.loadReminderEnabled(context)) }
-
-    val intervalOptions = listOf(1, 2, 3, 4) // in hours
-    //var selectedInterval by remember { mutableStateOf(WaterDataStore.loadReminderInterval(context)) }
 
     var notificationsEnabled by remember { mutableStateOf(false) }
     var selectedInterval by remember { mutableStateOf(2) }
+    var isInitialized by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         notificationsEnabled = WaterDataStore.loadReminderEnabled(context)
         selectedInterval = WaterDataStore.loadReminderInterval(context)
+        isInitialized = true
     }
-
-/*
-    LaunchedEffect(notificationsEnabled) {
-        WaterDataStore.saveReminderEnabled(context, notificationsEnabled)
-    }
-*/
 
     LaunchedEffect(currentGoal.intValue) {
         goalInput = currentGoal.intValue.toString()
@@ -129,7 +124,7 @@ fun SettingsScreen(
         Row(
             modifier = Modifier
                 .padding(horizontal = 10.dp)
-                .fillMaxSize(),
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -138,11 +133,19 @@ fun SettingsScreen(
                 checked = notificationsEnabled,
                 onCheckedChange = {
                     notificationsEnabled = it
-                    WaterDataStore.saveReminderEnabled(context, it)}
+                    WaterDataStore.saveReminderEnabled(context, it)
+
+                    if (it) {
+                        ReminderScheduler.scheduleRepeatingReminder(context, selectedInterval)
+                    } else {
+                        ReminderScheduler.cancelReminder(context)
+                    }
+                }
             )
         }
 
-        if (notificationsEnabled) {
+        if (isInitialized && notificationsEnabled) {
+
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
@@ -154,8 +157,9 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Row(
-                modifier = Modifier.padding(start = 10.dp),
-                horizontalArrangement = Arrangement.Center
+                modifier = Modifier.padding(start = 10.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 intervalOptions.forEach { hours ->
                     TextButton(onClick = {
