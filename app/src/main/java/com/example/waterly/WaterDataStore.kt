@@ -18,6 +18,7 @@ object WaterDataStore {
     private val HISTORY_KEY = stringPreferencesKey("waterHistory")
     private val GOAL_KEY = intPreferencesKey("dailyGoal")
     private val REMINDER_ENABLED_KEY = booleanPreferencesKey("reminderEnabled")
+    private val REMINDER_INTERVAL_KEY = intPreferencesKey("reminderInterval")
 
 
     fun saveWaterHistory(context: Context, history: Map<String,Int>) {
@@ -56,9 +57,23 @@ object WaterDataStore {
     fun loadReminderEnabled(context: Context): Boolean {
         return runBlocking {
             val prefs = context.dataStore.data.first()
-            prefs[REMINDER_ENABLED_KEY] ?: true // default to ON
+            prefs[REMINDER_ENABLED_KEY] ?: false // default to ON
         }
     }
+
+    fun saveReminderInterval(context: Context, intervalHours: Int) {
+        runBlocking {
+            context.dataStore.edit { it[REMINDER_INTERVAL_KEY] = intervalHours }
+        }
+    }
+
+    fun loadReminderInterval(context: Context): Int {
+        return runBlocking {
+            val prefs = context.dataStore.data.first()
+            prefs[REMINDER_INTERVAL_KEY] ?: 2 // default = 2 hrs
+        }
+    }
+
 
 
 }
