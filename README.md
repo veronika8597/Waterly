@@ -12,6 +12,23 @@
 
 ---
 
+## 🔥 Why You'll Love Waterly
+
+🚫 No clutter.  
+✅ No over-complication.  
+Just a beautifully crafted app that does one thing extremely well — helps you **hydrate properly**.
+
+- ✨ **Zero onboarding friction** — open and start tracking instantly  
+- 📈 **Progress that keeps you going** — weekly stats that feel rewarding  
+- 🎨 **Modern UI with purpose** — clean, calming, and satisfying  
+- 🔋 **Lightweight and efficient** — no bloat, no drain  
+
+> 💧 Waterly is the habit key — **Hydrate Properly.**
+
+---
+
+
+
 ## ✨ Features
 
 Waterly is designed to change that — with:
@@ -51,3 +68,17 @@ Waterly is designed to change that — with:
 1. Clone the repo:
    ```bash
    git clone https://github.com/veronika8597/Waterly.git
+
+---
+
+## 👩‍💻 Author
+Made with 💙 by Veronika
+
+
+---
+
+Let me know if you want:
+- A version with real screenshots
+- MVVM structure pre-generated
+- A clickable demo badge (e.g. Play Store / video link)
+
