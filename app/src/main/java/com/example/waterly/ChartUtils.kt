@@ -124,7 +124,7 @@ fun MonthlyBarChart(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(300.dp)
+            .height(270.dp)
     ) {
         AndroidView(
             modifier = Modifier

@@ -77,5 +77,6 @@ dependencies {
 
     implementation(libs.mpandroidchart)
 
+    implementation(libs.lottie.compose)
 
 }

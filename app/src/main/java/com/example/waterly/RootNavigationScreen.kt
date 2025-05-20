@@ -45,7 +45,12 @@ fun RootNavigationScreen() {
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Your screen content (NavHost)
-        NavHost(navController, startDestination = "home") {
+        NavHost(navController, startDestination = "splash") {
+
+            composable("splash") {
+                SplashScreen(navController)
+            }
+
 
             composable("home") {
                 HomeScreen(
@@ -71,11 +76,13 @@ fun RootNavigationScreen() {
         }
 
         // 🔥 Show bottom bar ONCE outside all screens
-        WaterlyBottomNavBar(
-            selectedIndex = selectedIndex,
-            onItemSelected = onItemSelected,
-            navController = navController,
-            modifier = Modifier.align(Alignment.BottomCenter)
-        )
+        if (currentRoute != "splash") {
+            WaterlyBottomNavBar(
+                selectedIndex = selectedIndex,
+                onItemSelected = onItemSelected,
+                navController = navController,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
+        }
     }
 }
