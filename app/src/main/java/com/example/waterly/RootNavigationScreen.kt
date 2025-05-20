@@ -13,7 +13,7 @@ import androidx.navigation.compose.rememberNavController
 
 
 @Composable
-fun MainScreen() {
+fun RootNavigationScreen() {
 
     val navController = rememberNavController()
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
@@ -62,9 +62,12 @@ fun MainScreen() {
                     onItemSelected = onItemSelected)
             }
 
-/*            composable("settings") {
-                SettingsScreen(navController)
-            }*/
+            composable("settings") {
+                SettingsScreen(
+                    navController = navController,
+                    selectedIndex = selectedIndex,
+                    onItemSelected = onItemSelected)
+            }
         }
 
         // 🔥 Show bottom bar ONCE outside all screens

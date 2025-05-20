@@ -6,7 +6,7 @@ import com.example.waterly.ui.theme.WaterlyTheme
 @Composable
 fun WaterlyApp() {
     WaterlyTheme{
-        MainScreen()
+        RootNavigationScreen()
     }
 
 }

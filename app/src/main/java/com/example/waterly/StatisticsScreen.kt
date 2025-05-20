@@ -1,6 +1,7 @@
 package com.example.waterly
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -29,19 +30,17 @@ fun StatisticsScreen(navController: NavHostController,
                      selectedIndex: Int,
                      onItemSelected: (Int) -> Unit) {
 
-    //var selectedIndex by rememberSaveable { mutableIntStateOf(1) }
-
-
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.Start
     ) {
 
         Spacer(modifier = Modifier.height(40.dp))
 
         Text(
+            modifier = Modifier.padding(start = 10.dp),
             text = "Drinking Statistics",
             style = WaterlyTypography.displayLarge,
             color = Color(0xFF00B4FC)
