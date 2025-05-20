@@ -62,6 +62,7 @@ fun HomeScreen(navController: NavHostController) {
     val context = LocalContext.current
     val waterHistory = remember { mutableStateOf(WaterDataStore.loadWaterHistory(context)) }
     var showFutureOverlay by rememberSaveable { mutableStateOf(false) }
+    var selectedIndex by rememberSaveable { mutableIntStateOf(1) }
 
 
     LaunchedEffect(selectedDate.value) {
@@ -69,264 +70,290 @@ fun HomeScreen(navController: NavHostController) {
     }
 
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(25.dp)
-    ) {
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // Top Bar
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Drink Water",
-                style = WaterlyTypography.displayLarge,
-                color = Color(0xFF00B4FC)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(30.dp))
-
-        // Middle area - Centered Water Circle + Glass
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                WaterFillCircle(waterIntake = waterIntake, waterGoal = waterGoal)
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                if (selectedItem != null) {
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            painter = painterResource(
-                                id = if (selectedItem == "glass") R.drawable.water_glass
-                                else R.drawable.water_bottle
-                            ),
-                            contentDescription = null,
-                            tint = Color(0xFF2196F3),
-                            modifier = Modifier.size(32.dp)
-                        )
-                        Text(
-                            text = if (selectedItem == "glass") "250 ml" else "${selectedBottleSize ?: "?"} ml",
-                            style = WaterlyTypography.bodyLarge, // << use correct size
-                            color = Color.Gray,
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.padding(top = 16.dp)
-                ) {
-
-                    // Glass (clickable)
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .offset {
-                                IntOffset(
-                                    0,
-                                    if (selectedItem == "glass") (-8).dp.roundToPx() else 0
-                                )
-                            }
-                            .clickable {
-                                if (!isFutureDate(selectedDate.value)) {
-                                    selectedItem = "glass"
-                                    waterIntake += 250
-                                    waterHistory.value = waterHistory.value.toMutableMap().apply {
-                                        put(selectedDate.value, waterIntake)
-                                    }
-                                    WaterDataStore.saveWaterHistory(context, waterHistory.value)
-                                    coroutineScope.launch {
-                                        scale.animateTo(1.2f, tween(100))
-                                        scale.animateTo(1f, tween(100))
-                                    }
-                                }
-                                else {
-                                    showFutureOverlay = true
-                                }
-                            }
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.water_glass),
-                            contentDescription = "Glass of Water",
-                            modifier = Modifier.size(55.dp),
-                            colorFilter = if (selectedItem == "glass") null else ColorFilter.tint(
-                                Color.Gray
-                            )
-                        )
-                    }
-
-                    // Bottle (clickable)
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .offset {
-                                IntOffset(
-                                    0,
-                                    if (selectedItem == "bottle") (-8).dp.roundToPx() else 0
-                                )
-                            }
-                            .clickable {
-                                if (!isFutureDate(selectedDate.value)) {
-                                    showBottleDialog = true
-                                    selectedItem = "bottle"
-                                    coroutineScope.launch {
-                                        scale.animateTo(1.2f, tween(100))
-                                        scale.animateTo(1f, tween(100))
-                                    }
-                                }
-                                else {
-                                    showFutureOverlay = true
-                                }
-                            }
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.water_bottle),
-                            contentDescription = "Water Bottle",
-                            modifier = Modifier.size(60.dp),
-                            colorFilter = if (selectedItem == "bottle") null else ColorFilter.tint(
-                                Color.Gray
-                            )
-                        )
-                    }
-                }
-
-                if (showBottleDialog) {
-                    BottleSizeDialog(
-                        onSelect = { size ->
-                            waterIntake += size
-                            waterHistory.value = waterHistory.value.toMutableMap().apply {
-                                put(selectedDate.value, waterIntake)
-                            }
-                            WaterDataStore.saveWaterHistory(context, waterHistory.value)
-
-                            selectedBottleSize = size
-                            selectedItem = "bottle"
-                            showBottleDialog = false
-                        },
-                        onDismiss = { showBottleDialog = false }
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(30.dp))
+    Box(modifier = Modifier.fillMaxSize()) {
 
         Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(25.dp)
+                .padding(bottom = 100.dp) // ✅ leave space for the nav bar
         ) {
-            Text(
-                text = "Week",
-                style = WaterlyTypography.labelLarge,
-                color = Color.Black
-            )
-            Spacer(modifier = Modifier.height(8.dp))
 
-            Box(
-                modifier = Modifier
-                    .width(60.dp)
-                    .height(2.dp)
-                    .background(Color(0xFF00B4FC)) // blue underline
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Top Bar
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Drink Water",
+                    style = WaterlyTypography.displayLarge,
+                    color = Color(0xFF00B4FC)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(2.dp))
+
+            Text(
+                text = getDayLabel(selectedDate.value),
+                style = WaterlyTypography.titleMedium,
+                color = Color.Gray
             )
 
             Spacer(modifier = Modifier.height(30.dp))
 
-            // Week range (Nov 15 – Nov 21)
-            Text(
-                text = getWeekRangeTitle(currentWeek),
-                style = WaterlyTypography.labelMedium,
-                color = Color.Gray
-            )
-
-        }
-
-        Spacer(modifier = Modifier.height(30.dp))
-
-        val dayNames = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            currentWeek.forEachIndexed { index, date ->
-                val isSelected = date == selectedDate.value
-
+            // Middle area - Centered Water Circle + Glass
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
                 Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .weight(1f)
-                        .clickable {
-                            selectedDate.value = date
-                            waterIntake = waterHistory.value[date] ?: 0
-                        }
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Day name
-                    Text(
-                        text = dayNames[index % 7],
-                        style = WaterlyTypography.labelSmall,
-                        color = Color.Gray
-                    )
+                    WaterFillCircle(waterIntake = waterIntake, waterGoal = waterGoal)
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
-                    // Date box
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .background(
-                                color = if (isSelected) Color(0xFF00B4FC) else Color(0xFFE0E0E0),
-                                shape = MaterialTheme.shapes.small
-                            ),
-                        contentAlignment = Alignment.Center
+                    if (selectedItem != null) {
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                painter = painterResource(
+                                    id = if (selectedItem == "glass") R.drawable.water_glass
+                                    else R.drawable.water_bottle
+                                ),
+                                contentDescription = null,
+                                tint = Color(0xFF2196F3),
+                                modifier = Modifier.size(32.dp)
+                            )
+                            Text(
+                                text = if (selectedItem == "glass") "250 ml" else "${selectedBottleSize ?: "?"} ml",
+                                style = WaterlyTypography.bodyLarge, // << use correct size
+                                color = Color.Gray,
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.padding(top = 16.dp)
                     ) {
-                        Text(
-                            text = date.takeLast(2), // Show day number
-                            style = WaterlyTypography.labelMedium,
-                            color = if (isSelected) Color.White else Color.Black
+
+                        // Glass (clickable)
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .offset {
+                                    IntOffset(
+                                        0,
+                                        if (selectedItem == "glass") (-8).dp.roundToPx() else 0
+                                    )
+                                }
+                                .clickable {
+                                    if (!isFutureDate(selectedDate.value)) {
+                                        selectedItem = "glass"
+                                        waterIntake += 250
+                                        waterHistory.value =
+                                            waterHistory.value.toMutableMap().apply {
+                                                put(selectedDate.value, waterIntake)
+                                            }
+                                        WaterDataStore.saveWaterHistory(context, waterHistory.value)
+                                        coroutineScope.launch {
+                                            scale.animateTo(1.2f, tween(100))
+                                            scale.animateTo(1f, tween(100))
+                                        }
+                                    } else {
+                                        showFutureOverlay = true
+                                    }
+                                }
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.water_glass),
+                                contentDescription = "Glass of Water",
+                                modifier = Modifier.size(55.dp),
+                                colorFilter = if (selectedItem == "glass") null else ColorFilter.tint(
+                                    Color.Gray
+                                )
+                            )
+                        }
+
+                        // Bottle (clickable)
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .offset {
+                                    IntOffset(
+                                        0,
+                                        if (selectedItem == "bottle") (-8).dp.roundToPx() else 0
+                                    )
+                                }
+                                .clickable {
+                                    if (!isFutureDate(selectedDate.value)) {
+                                        showBottleDialog = true
+                                        selectedItem = "bottle"
+                                        coroutineScope.launch {
+                                            scale.animateTo(1.2f, tween(100))
+                                            scale.animateTo(1f, tween(100))
+                                        }
+                                    } else {
+                                        showFutureOverlay = true
+                                    }
+                                }
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.water_bottle),
+                                contentDescription = "Water Bottle",
+                                modifier = Modifier.size(60.dp),
+                                colorFilter = if (selectedItem == "bottle") null else ColorFilter.tint(
+                                    Color.Gray
+                                )
+                            )
+                        }
+                    }
+
+                    if (showBottleDialog) {
+                        BottleSizeDialog(
+                            onSelect = { size ->
+                                waterIntake += size
+                                waterHistory.value = waterHistory.value.toMutableMap().apply {
+                                    put(selectedDate.value, waterIntake)
+                                }
+                                WaterDataStore.saveWaterHistory(context, waterHistory.value)
+
+                                selectedBottleSize = size
+                                selectedItem = "bottle"
+                                showBottleDialog = false
+                            },
+                            onDismiss = { showBottleDialog = false }
                         )
                     }
                 }
             }
-        }
-    }
 
-    if (showFutureOverlay) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.4f)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Can't log future data",
-                style = WaterlyTypography.bodyLarge,
-                color = Color.White
-            )
+            Spacer(modifier = Modifier.height(30.dp))
 
-            LaunchedEffect(Unit) {
-                kotlinx.coroutines.delay(1500)
-                showFutureOverlay = false
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Week",
+                    style = WaterlyTypography.labelLarge,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Box(
+                    modifier = Modifier
+                        .width(60.dp)
+                        .height(2.dp)
+                        .background(Color(0xFF00B4FC)) // blue underline
+                )
+
+                Spacer(modifier = Modifier.height(30.dp))
+
+                // Week range (Nov 15 – Nov 21)
+                Text(
+                    text = getWeekRangeTitle(currentWeek),
+                    style = WaterlyTypography.labelMedium,
+                    color = Color.Gray
+                )
+
+            }
+
+            Spacer(modifier = Modifier.height(30.dp))
+
+            val dayNames = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                currentWeek.forEachIndexed { index, date ->
+                    val isSelected = date == selectedDate.value
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable {
+                                selectedDate.value = date
+                                waterIntake = waterHistory.value[date] ?: 0
+                            }
+                    ) {
+                        // Day name
+                        Text(
+                            text = dayNames[index % 7],
+                            style = WaterlyTypography.labelSmall,
+                            color = Color.Gray
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        // Date box
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .background(
+                                    color = if (isSelected) Color(0xFF00B4FC) else Color(0xFFE0E0E0),
+                                    shape = MaterialTheme.shapes.small
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = date.takeLast(2), // Show day number
+                                style = WaterlyTypography.labelMedium,
+                                color = if (isSelected) Color.White else Color.Black
+                            )
+                        }
+                    }
+                }
             }
         }
+
+        //Bottom navigation bar
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+        ) {
+            WaterlyBottomNavBar(
+                selectedIndex = selectedIndex,
+                onItemSelected = { selectedIndex = it }
+            )
+        }
+
+        if (showFutureOverlay) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.4f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Can't log future data",
+                    style = WaterlyTypography.bodyLarge,
+                    color = Color.White
+                )
+
+                LaunchedEffect(Unit) {
+                    kotlinx.coroutines.delay(1500)
+                    showFutureOverlay = false
+                }
+            }
+
+        }
     }
+
 }
 
 @Preview(showBackground = true)

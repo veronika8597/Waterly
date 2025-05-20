@@ -1,7 +1,9 @@
 package com.example.waterly
 
+import android.annotation.SuppressLint
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 
 fun getCurrentWeekDates(): List<String> {
@@ -30,3 +32,31 @@ fun getWeekRangeTitle(week: List<String>): String {
     return "$start – $end"
 }
 
+fun getTodayDate(): String {
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    return dateFormat.format(Date())
+}
+
+@SuppressLint("SimpleDateFormat")
+fun isFutureDate(date: String): Boolean {
+    val formatter = java.text.SimpleDateFormat("yyyy-MM-dd")
+    val today = formatter.parse(getTodayDate())
+    val selected = formatter.parse(date)
+
+    return selected?.after(today) ?: false
+}
+
+
+fun getDayLabel(date: String): String {
+    val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    val today = formatter.parse(getTodayDate())
+    val selected = formatter.parse(date)
+    val diffDays = ((selected.time - today.time) / (1000 * 60 * 60 * 24)).toInt()
+
+    return when (diffDays) {
+        0 -> "Today"
+        1 -> "Tomorrow"
+        -1 -> "Yesterday"
+        else -> date
+    }
+}

@@ -78,5 +78,11 @@ val WaterlyTypography = Typography(
         fontFamily = QuicksandFont,
         fontWeight = FontWeight.Medium,
         fontSize = 12.sp
+    ),
+
+    titleMedium = TextStyle(
+        fontFamily = QuicksandFont,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 18.sp
     )
 )
