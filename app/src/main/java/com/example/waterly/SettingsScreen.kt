@@ -113,17 +113,17 @@ fun SettingsScreen(
             modifier = Modifier
                 .padding(horizontal = 10.dp),
             colors = TextFieldDefaults.colors(
-/*                focusedContainerColor = Color(0x2700B4FC),
+                focusedContainerColor = Color(0x2700B4FC),
                 unfocusedContainerColor = Color(0x2700B4FC),
                 disabledContainerColor = Color(0x2700B4FC),
                 errorContainerColor = Color(0x2700B4FC),
-                focusedIndicatorColor = Color(0xFF00B4FC)*/
-                focusedContainerColor = Color.Transparent,
+                focusedIndicatorColor = Color(0xFF00B4FC),
+               /* focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
                 disabledContainerColor = Color.Transparent,
                 errorContainerColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color(0xFF00B4FC),
+                focusedIndicatorColor = Color.Transparent,*/
+                unfocusedIndicatorColor = Color.Transparent,
                 cursorColor = Color(0xFF00B4FC)
             )
         )
