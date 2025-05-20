@@ -40,11 +40,24 @@ fun SettingsScreen(
     val context = LocalContext.current
     var goalInput by remember { mutableStateOf("") }
     val currentGoal = remember { mutableIntStateOf(WaterDataStore.loadDailyGoal(context)) }
-    var notificationsEnabled by remember { mutableStateOf(WaterDataStore.loadReminderEnabled(context)) }
+    //var notificationsEnabled by remember { mutableStateOf(WaterDataStore.loadReminderEnabled(context)) }
 
-/*    LaunchedEffect(notificationsEnabled) {
+    val intervalOptions = listOf(1, 2, 3, 4) // in hours
+    //var selectedInterval by remember { mutableStateOf(WaterDataStore.loadReminderInterval(context)) }
+
+    var notificationsEnabled by remember { mutableStateOf(false) }
+    var selectedInterval by remember { mutableStateOf(2) }
+
+    LaunchedEffect(Unit) {
+        notificationsEnabled = WaterDataStore.loadReminderEnabled(context)
+        selectedInterval = WaterDataStore.loadReminderInterval(context)
+    }
+
+/*
+    LaunchedEffect(notificationsEnabled) {
         WaterDataStore.saveReminderEnabled(context, notificationsEnabled)
-    }*/
+    }
+*/
 
     LaunchedEffect(currentGoal.intValue) {
         goalInput = currentGoal.intValue.toString()
@@ -129,8 +142,34 @@ fun SettingsScreen(
             )
         }
 
+        if (notificationsEnabled) {
+            Spacer(modifier = Modifier.height(16.dp))
 
+            Text(
+                modifier = Modifier.padding(start = 10.dp),
+                text = "Reminder Interval",
+                style = WaterlyTypography.bodyLarge
+            )
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.padding(start = 10.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                intervalOptions.forEach { hours ->
+                    TextButton(onClick = {
+                        selectedInterval = hours
+                        WaterDataStore.saveReminderInterval(context, hours)
+                    }) {
+                        Text(
+                            text = "$hours hr",
+                            color = if (selectedInterval == hours) Color(0xFF00B4FC) else Color.Gray
+                        )
+                    }
+                }
+            }
+        }
 // (Future steps: add interval + quiet hours when this toggle is ON)
 
 
