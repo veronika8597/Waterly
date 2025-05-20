@@ -44,6 +44,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.core.app.NotificationManagerCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.waterly.ui.theme.WaterlyTheme
@@ -157,6 +158,7 @@ fun HomeScreen(navController: NavHostController, selectedIndex: Int, onItemSelec
                             color = Color.Gray,
                             modifier = Modifier.padding(top = 4.dp)
                         )
+
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -181,12 +183,21 @@ fun HomeScreen(navController: NavHostController, selectedIndex: Int, onItemSelec
                             .clickable {
                                 if (!isFutureDate(selectedDate.value)) {
                                     selectedItem = "glass"
+                                    val previousIntake = waterIntake
                                     waterIntake += 250
+
+                                    if (previousIntake < waterGoal && waterIntake >= waterGoal) {
+                                        if (NotificationManagerCompat.from(context).areNotificationsEnabled()) {
+                                            ReminderWorker.sendGoalReachedNotification(context)
+                                        }
+                                    }
+
                                     waterHistory.value =
                                         waterHistory.value.toMutableMap().apply {
                                             put(selectedDate.value, waterIntake)
                                         }
                                     WaterDataStore.saveWaterHistory(context, waterHistory.value)
+
                                     coroutineScope.launch {
                                         scale.animateTo(1.2f, tween(100))
                                         scale.animateTo(1f, tween(100))
@@ -242,8 +253,17 @@ fun HomeScreen(navController: NavHostController, selectedIndex: Int, onItemSelec
 
                 if (showBottleDialog) {
                     BottleSizeDialog(
-                        onSelect = { size ->
+
+                        onSelect = @androidx.annotation.RequiresPermission(android.Manifest.permission.POST_NOTIFICATIONS) { size ->
+                            val previousIntake = waterIntake
                             waterIntake += size
+
+                            if (previousIntake < waterGoal && waterIntake >= waterGoal) {
+                                if (NotificationManagerCompat.from(context).areNotificationsEnabled()) {
+                                    ReminderWorker.sendGoalReachedNotification(context)
+                                }
+                            }
+
                             waterHistory.value = waterHistory.value.toMutableMap().apply {
                                 put(selectedDate.value, waterIntake)
                             }

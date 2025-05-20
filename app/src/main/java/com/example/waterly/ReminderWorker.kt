@@ -1,11 +1,12 @@
 package com.example.waterly
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
+import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.Worker
@@ -14,11 +15,22 @@ import androidx.work.WorkerParameters
 class ReminderWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
 
     override fun doWork(): Result {
-        showReminderNotification()
+        val context = applicationContext
+        val waterHistory = WaterDataStore.loadWaterHistory(context)
+        val goal = WaterDataStore.loadDailyGoal(context)
+        val today = getTodayDate()
+        val todayIntake = waterHistory[today] ?: 0
+
+        if (todayIntake >= goal) {
+            Log.d("ReminderWorker", "Skipped: goal met ($todayIntake / $goal)")
+            return Result.success()
+        }
+
+        showReminderNotification(context)
         return Result.success()
     }
 
-    private fun showReminderNotification() {
+    private fun showReminderNotification(context: Context) {
         val channelId = "water_reminder_channel"
         val notificationId = 1
 
@@ -52,6 +64,68 @@ class ReminderWorker(context: Context, params: WorkerParameters) : Worker(contex
                     Log.e("Error showing notification", e.toString())
                 }
             }
+        }
+
+    }
+
+    companion object {
+    /*    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
+        fun testReminder(context: Context) {
+            val waterHistory = WaterDataStore.loadWaterHistory(context)
+            val goal = WaterDataStore.loadDailyGoal(context)
+            val today = getTodayDate()
+            val todayIntake = waterHistory[today] ?: 0
+
+            if (todayIntake >= goal) {
+                Log.d("ReminderWorker", "Test skipped: goal met ($todayIntake / $goal)")
+            } else {
+                Log.d("ReminderWorker", "Test showing reminder")
+
+                val channelId = "water_reminder_channel"
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    val channel = NotificationChannel(
+                        channelId,
+                        "Water Reminders",
+                        NotificationManager.IMPORTANCE_DEFAULT
+                    )
+                    val manager =
+                        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    manager.createNotificationChannel(channel)
+                }
+
+                val builder = NotificationCompat.Builder(context, channelId)
+                    .setSmallIcon(R.drawable.ic_launcher_foreground)
+                    .setContentTitle("Time to hydrate 💧")
+                    .setContentText("This is a test to hydrate.")
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+
+                NotificationManagerCompat.from(context).notify(99, builder.build())
+            }
+        }*/
+
+        @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
+        fun sendGoalReachedNotification(context: Context) {
+            val channelId = "goal_reached_channel"
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channel = NotificationChannel(
+                    channelId,
+                    "Goal Achievements",
+                    NotificationManager.IMPORTANCE_DEFAULT
+                ).apply {
+                    description = "Celebrate reaching your water goal!"
+                }
+                val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                manager.createNotificationChannel(channel)
+            }
+
+            val builder = NotificationCompat.Builder(context, channelId)
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setContentTitle("🎉 Goal Reached!")
+                .setContentText("You've hit your daily water goal — great job! 💧")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+
+            NotificationManagerCompat.from(context).notify(200, builder.build())
         }
 
     }
