@@ -1,8 +1,7 @@
 <p align="center">
-  <img src="assets/waterly_logo.png" alt="Waterly Logo" width="200"/>
+  <img src="assets/waterly_logo.png" alt="Waterly Logo" width="250"/>
 </p>
 
-<h1 align="center">💧 Waterly 💧</h1>
 <p align="center"><i>Hydrate Properly</i></p>
 
 ---
