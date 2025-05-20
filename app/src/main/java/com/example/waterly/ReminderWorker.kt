@@ -82,7 +82,6 @@ class ReminderWorker(context: Context, params: WorkerParameters) : Worker(contex
                 }
             }
         }
-
     }
 
     companion object {
