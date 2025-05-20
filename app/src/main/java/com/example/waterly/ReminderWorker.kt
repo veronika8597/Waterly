@@ -11,18 +11,35 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import java.util.Calendar
 
 class ReminderWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
 
     override fun doWork(): Result {
         val context = applicationContext
+
         val waterHistory = WaterDataStore.loadWaterHistory(context)
         val goal = WaterDataStore.loadDailyGoal(context)
         val today = getTodayDate()
         val todayIntake = waterHistory[today] ?: 0
 
+        val (quietStart, quietEnd) = WaterDataStore.loadQuietHours(context)
+        val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+
         if (todayIntake >= goal) {
             Log.d("ReminderWorker", "Skipped: goal met ($todayIntake / $goal)")
+            return Result.success()
+        }
+
+
+        val isQuietTime = if (quietStart < quietEnd) {
+            currentHour in quietStart until quietEnd
+        } else {
+            currentHour >= quietStart || currentHour < quietEnd
+        }
+
+        if (isQuietTime) {
+            Log.d("ReminderWorker", "Skipped: quiet hours ($currentHour)")
             return Result.success()
         }
 
@@ -69,40 +86,6 @@ class ReminderWorker(context: Context, params: WorkerParameters) : Worker(contex
     }
 
     companion object {
-    /*    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
-        fun testReminder(context: Context) {
-            val waterHistory = WaterDataStore.loadWaterHistory(context)
-            val goal = WaterDataStore.loadDailyGoal(context)
-            val today = getTodayDate()
-            val todayIntake = waterHistory[today] ?: 0
-
-            if (todayIntake >= goal) {
-                Log.d("ReminderWorker", "Test skipped: goal met ($todayIntake / $goal)")
-            } else {
-                Log.d("ReminderWorker", "Test showing reminder")
-
-                val channelId = "water_reminder_channel"
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    val channel = NotificationChannel(
-                        channelId,
-                        "Water Reminders",
-                        NotificationManager.IMPORTANCE_DEFAULT
-                    )
-                    val manager =
-                        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                    manager.createNotificationChannel(channel)
-                }
-
-                val builder = NotificationCompat.Builder(context, channelId)
-                    .setSmallIcon(R.drawable.ic_launcher_foreground)
-                    .setContentTitle("Time to hydrate 💧")
-                    .setContentText("This is a test to hydrate.")
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-
-                NotificationManagerCompat.from(context).notify(99, builder.build())
-            }
-        }*/
-
         @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
         fun sendGoalReachedNotification(context: Context) {
             val channelId = "goal_reached_channel"
@@ -127,6 +110,5 @@ class ReminderWorker(context: Context, params: WorkerParameters) : Worker(contex
 
             NotificationManagerCompat.from(context).notify(200, builder.build())
         }
-
     }
 }
