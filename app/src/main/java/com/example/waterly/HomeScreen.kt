@@ -59,14 +59,16 @@ import java.util.Locale
 @Composable
 fun HomeScreen(navController: NavHostController, selectedIndex: Int, onItemSelected: (Int) -> Unit) {
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
     var waterIntake by rememberSaveable { mutableIntStateOf(0) }
     val selectedDate = rememberSaveable { mutableStateOf(getTodayDate()) }
-    val waterGoal = 2000 // in ml
+    //val waterGoal = 2000 // in ml
+    val waterGoal = remember {WaterDataStore.loadDailyGoal(context)}
     val scale = remember { Animatable(1f) }
     var showBottleDialog by rememberSaveable { mutableStateOf(false) }
     var selectedBottleSize by rememberSaveable { mutableStateOf<Int?>(null) }
     var selectedItem by rememberSaveable { mutableStateOf<String?>(null) }
-    val context = LocalContext.current
+
     val waterHistory = remember { mutableStateOf(WaterDataStore.loadWaterHistory(context)) }
     var showFutureOverlay by rememberSaveable { mutableStateOf(false) }
     //var selectedIndex by rememberSaveable { mutableIntStateOf(1) }

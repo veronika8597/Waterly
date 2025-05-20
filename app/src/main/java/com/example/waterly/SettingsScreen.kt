@@ -2,11 +2,13 @@ package com.example.waterly
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -38,11 +40,15 @@ fun SettingsScreen(
     val context = LocalContext.current
     var goalInput by remember { mutableStateOf("") }
     val currentGoal = remember { mutableIntStateOf(WaterDataStore.loadDailyGoal(context)) }
+    var notificationsEnabled by remember { mutableStateOf(WaterDataStore.loadReminderEnabled(context)) }
+
+/*    LaunchedEffect(notificationsEnabled) {
+        WaterDataStore.saveReminderEnabled(context, notificationsEnabled)
+    }*/
 
     LaunchedEffect(currentGoal.intValue) {
         goalInput = currentGoal.intValue.toString()
     }
-
 
 
     Column(
@@ -96,6 +102,37 @@ fun SettingsScreen(
         ) {
             Text("Save Goal")
         }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Text(
+            modifier = Modifier.padding(start = 10.dp),
+            text = "Notifications",
+            style = WaterlyTypography.titleMedium
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 10.dp)
+                .fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(text = "Reminders", style = WaterlyTypography.bodyLarge)
+            Switch(
+                checked = notificationsEnabled,
+                onCheckedChange = {
+                    notificationsEnabled = it
+                    WaterDataStore.saveReminderEnabled(context, it)}
+            )
+        }
+
+
+
+// (Future steps: add interval + quiet hours when this toggle is ON)
+
 
     }
 }
