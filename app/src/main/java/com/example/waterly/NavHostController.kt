@@ -12,5 +12,6 @@ fun WaterlyNavGraph() {
     val navController = rememberNavController()
     NavHost(navController, startDestination = "home") {
         composable("home") { HomeScreen(navController) }
+        composable("statistics") { StatisticsScreen() }
     }
 }

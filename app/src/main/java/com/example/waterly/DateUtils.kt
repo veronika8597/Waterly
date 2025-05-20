@@ -8,9 +8,7 @@ import java.util.Locale
 
 fun getCurrentWeekDates(startDate: Date): List<String> {
     val calendar = Calendar.getInstance()
-
     calendar.time = startDate
-    // Go to start of the week (Sunday)
     calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
 
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
