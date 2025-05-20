@@ -28,7 +28,7 @@ val WaterlyTypography = Typography(
     displayLarge = TextStyle(
         fontFamily = ShrikhandFont,
         fontWeight = FontWeight.Normal,
-        fontSize = 36.sp
+        fontSize = 38.sp
     ),
 
     // Medium title (Shrikhand)
@@ -83,6 +83,6 @@ val WaterlyTypography = Typography(
     titleMedium = TextStyle(
         fontFamily = QuicksandFont,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 18.sp
+        fontSize = 22.sp
     )
 )
