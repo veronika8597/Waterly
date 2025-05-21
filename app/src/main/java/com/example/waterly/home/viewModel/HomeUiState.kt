@@ -1,4 +1,4 @@
-package com.example.waterly.home.viewmodel
+package com.example.waterly.home.viewModel
 
 
 data class HomeUiState(

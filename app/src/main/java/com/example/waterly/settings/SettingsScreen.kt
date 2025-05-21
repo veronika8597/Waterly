@@ -1,4 +1,4 @@
-package com.example.waterly
+package com.example.waterly.settings
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -41,6 +41,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.waterly.ReminderScheduler
+import com.example.waterly.WaterDataStore
 import com.example.waterly.ui.theme.WaterlyTheme
 import com.example.waterly.ui.theme.WaterlyTypography
 

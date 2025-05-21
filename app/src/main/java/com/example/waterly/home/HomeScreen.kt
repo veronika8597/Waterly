@@ -32,7 +32,7 @@ import com.example.waterly.getCurrentWeekDates
 import com.example.waterly.getDayLabel
 import com.example.waterly.getTodayDate
 import com.example.waterly.getWeekRangeTitle
-import com.example.waterly.home.viewmodel.HomeViewModel
+import com.example.waterly.home.viewModel.HomeViewModel
 import com.example.waterly.ui.theme.WaterlyTheme
 import com.example.waterly.ui.theme.WaterlyTypography
 import kotlinx.coroutines.delay

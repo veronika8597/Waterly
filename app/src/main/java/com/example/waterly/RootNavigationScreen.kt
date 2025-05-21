@@ -11,6 +11,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.waterly.home.HomeScreen
+import com.example.waterly.settings.SettingsScreen
+import com.example.waterly.statistics.StatisticsScreen
 
 
 @Composable
@@ -65,14 +67,16 @@ fun RootNavigationScreen() {
                 StatisticsScreen(
                     navController = navController,
                     selectedIndex = selectedIndex,
-                    onItemSelected = onItemSelected)
+                    onItemSelected = onItemSelected
+                )
             }
 
             composable("settings") {
                 SettingsScreen(
                     navController = navController,
                     selectedIndex = selectedIndex,
-                    onItemSelected = onItemSelected)
+                    onItemSelected = onItemSelected
+                )
             }
         }
 

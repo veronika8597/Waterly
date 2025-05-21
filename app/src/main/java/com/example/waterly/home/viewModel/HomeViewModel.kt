@@ -1,4 +1,4 @@
-package com.example.waterly.home.viewmodel
+package com.example.waterly.home.viewModel
 
 import android.Manifest
 import android.content.Context
