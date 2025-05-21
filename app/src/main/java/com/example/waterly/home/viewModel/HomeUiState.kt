@@ -9,6 +9,7 @@ data class HomeUiState(
     val selectedBottleSize: Int? = null,
     val showBottleDialog: Boolean = false,
     val showFutureOverlay: Boolean = false,
+    val showConfetti: Boolean = false,
     val waterHistory: Map<String, Int> = emptyMap()
 ) {
     val selectedSizeLabel: String

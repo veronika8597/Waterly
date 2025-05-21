@@ -66,6 +66,7 @@ class HomeViewModel : ViewModel() {
             newIntake >= _uiState.value.waterGoal
         ) {
             ReminderWorker.sendGoalReachedNotification(context)
+            onGoalReached()
         }
 
         _uiState.value = _uiState.value.copy(
@@ -102,6 +103,7 @@ class HomeViewModel : ViewModel() {
             newIntake >= _uiState.value.waterGoal
         ) {
             ReminderWorker.sendGoalReachedNotification(context)
+            onGoalReached()
         }
 
         _uiState.value = _uiState.value.copy(
@@ -117,7 +119,18 @@ class HomeViewModel : ViewModel() {
         _uiState.value = _uiState.value.copy(showBottleDialog = false)
     }
 
+    fun onGoalReached(){
+        _uiState.value = _uiState.value.copy(showConfetti = true)
+        viewModelScope.launch {
+            kotlinx.coroutines.delay(3000)
+            _uiState.value = _uiState.value.copy(showConfetti = false)
+        }
+
+    }
+
     fun dismissOverlay() {
         _uiState.value = _uiState.value.copy(showFutureOverlay = false)
     }
+
+
 }
