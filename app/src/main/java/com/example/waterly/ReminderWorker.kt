@@ -3,6 +3,7 @@ package com.example.waterly
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.os.Build
 import android.util.Log
@@ -64,12 +65,23 @@ class ReminderWorker(context: Context, params: WorkerParameters) : Worker(contex
             notificationManager.createNotificationChannel(channel)
         }
 
+        // Intent to launch app
+        val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         // Build and show the notification
         val builder = NotificationCompat.Builder(applicationContext, channelId)
             .setSmallIcon(R.drawable.ic_launcher_foreground) // Change if needed
             .setContentTitle("Time to hydrate 💧")
             .setContentText("Don't forget to drink water!")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent) // 👈 This makes it launch the app
+            .setAutoCancel(true)
 
         if (NotificationManagerCompat.from(applicationContext)
                 .areNotificationsEnabled()
@@ -101,11 +113,22 @@ class ReminderWorker(context: Context, params: WorkerParameters) : Worker(contex
                 manager.createNotificationChannel(channel)
             }
 
+            // Intent to launch app
+            val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+            val pendingIntent = PendingIntent.getActivity(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
             val builder = NotificationCompat.Builder(context, channelId)
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .setContentTitle("🎉 Goal Reached!")
                 .setContentText("You've hit your daily water goal — great job! 💧")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(pendingIntent) // 👈 This makes it launch the app
+                .setAutoCancel(true)
 
             NotificationManagerCompat.from(context).notify(200, builder.build())
         }
