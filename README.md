@@ -79,6 +79,5 @@ Made with 💙 by Veronika
 
 Let me know if you want:
 - A version with real screenshots
-- MVVM structure pre-generated
 - A clickable demo badge (e.g. Play Store / video link)
 
